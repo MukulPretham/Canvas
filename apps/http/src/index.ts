@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { string, z } from "zod";
 import { auth } from "./middleware"
 import jwt_sec from "@repo/backend-common/config";
+import { client } from "@repo/db/client"
 
 const app = express();
 
@@ -12,7 +13,10 @@ app.get("/",auth,(req,res)=>{
     res.send("hello");
 })
 
-app.post("/signup",(req: Request,res: any)=>{
+app.post("/signup",async(req: Request,res: any)=>{
+    if(!req.body){
+        return;
+    }
     let currUser = req.body;
     let userSchema = z.object({
         username: z.string().min(8),
@@ -25,6 +29,11 @@ app.post("/signup",(req: Request,res: any)=>{
     }
 
     //DB logic
+    // currUser = await client.user.findFirst({
+    //     where:{
+    //         username: req.body.username
+    //     }
+    // })
 
     // if(exist){}
 
