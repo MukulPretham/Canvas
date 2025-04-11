@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -b",
-    "dev": "tsc -b && node ./dist/index/js",
+    "dev": "tsc -b && node ./dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,5 +13,8 @@
   "description": "",
   "dependencies": {
     "ws": "^8.18.1"
+  },
+  "devDependencies": {
+     "@repo/typescript-config": "workspace:*"
   }
 }
