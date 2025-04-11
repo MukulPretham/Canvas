@@ -1,6 +1,6 @@
 const JWT_SECRET = "my_super_secret_key";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import jwt_sec from "./secret";
+import jwt_sec from "@repo/backend-common/config";
 
 interface decodedMsg extends JwtPayload{
     userId: string
