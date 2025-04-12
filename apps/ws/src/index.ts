@@ -16,9 +16,14 @@ type error = {
     error: string
 }
 
-type MessagePayload = {
-    roomID: Number
-    senderID: string
+type ChatPayload = {
+    message: string
+}
+
+type Message = {
+    type: "join" | "message" | "leave"
+    roomId: Number
+    messagePayload?: ChatPayload
 }
 
 // let SOCKETS = new Map<string,WebSocket>();  // user -- socket
@@ -28,7 +33,7 @@ type MessagePayload = {
 interface User {
     socket: WebSocket
     userId: string
-    roomId : string[]
+    roomId : Number[]
 }
 
 const Users:User[] = [];
@@ -88,10 +93,62 @@ wss.on("connection",async(socket,request)=>{
 
     //-------------------------------------------------------------------------------------//
 
-    SOCKETS.set(currUserInfo?.userId,socket);
+    Users.push({
+        socket: socket,
+        userId: currUserInfo.userId,
+        roomId: []
+    })
+    console.log(Users);
 
-    socket.on("message",(data)=>{
-        socket.send(data.toString());
+    socket.on("message",async(data)=>{
+        let parsedData: Message = JSON.parse(data.toString());
+        console.log(parsedData);
+        if(parsedData.type === "join" && parsedData.roomId){ 
+            let exist = await client.room.findFirst({
+                where:{
+                    id: parseInt(parsedData.roomId.toString())
+                }
+            })
+            if(!exist){
+                socket.send(JSON.stringify({message: "room doesnt exist"}));
+            }
+            Users.forEach((entry)=>{
+                if(entry.userId === currUserInfo.userId){
+                    entry.roomId.push(parsedData.roomId);
+                    console.log(entry.roomId);
+                    return;
+                }
+            })
+        }
+        else if(parsedData.type === "leave" && parsedData.roomId){
+            Users.forEach((entry)=>{
+                if(entry.userId === currUserInfo.userId){
+                    entry.roomId = entry.roomId.filter(x => x!=parsedData.roomId);
+                    console.log(entry.roomId);
+                    return;
+                }
+            })
+        }else if(parsedData.type === "message" && parsedData.messagePayload && parsedData.roomId){
+            try{
+                await client.chat.create({
+                    data:{
+                        roomID: parseInt(parsedData.roomId.toString()),
+                        message: parsedData.messagePayload.message,
+                        senderID: currUserInfo.userId
+                    }
+                })
+            }catch(e){
+                socket.send("DB problem");
+            }
+            
+            Users.forEach((entry)=>{
+                if(entry.roomId.includes(parsedData.roomId)){
+                    entry.socket.send(JSON.stringify({message: parsedData.messagePayload?.message, sender:currUserInfo.name}));
+                }
+            })
+        }else{
+            socket.send(JSON.stringify({message: "wrong format "}));
+        }
     })
 })
 

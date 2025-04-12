@@ -107,6 +107,22 @@ app.post("/create",auth,async(req:any,res)=>{
 
 })
 
+app.get("/chats/:roomId",auth,async(req,res)=>{
+    let roomId = Number(req.params.roomId);
+    let messages;
+    try{
+        messages = await client.chat.findMany({
+            where:{
+                roomID: roomId
+            }
+        })
+    }catch(e){
+        res.json({message: "room not found or internal server error"});
+        return;
+    }
+    res.json(messages);
+})
+
 app.listen(8081,()=>{
     console.log("http server has started");
 })

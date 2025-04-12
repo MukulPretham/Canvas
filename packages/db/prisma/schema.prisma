@@ -34,6 +34,7 @@ model Chat{
   id Int @default(autoincrement()) @id
   roomID Int
   senderID String
+  message String @default("Default message")
   room Room @relation(fields: [roomID],references: [id])
   sender User @relation(fields: [senderID],references: [id])
 }
