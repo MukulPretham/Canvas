@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { string, z } from "zod";
 import { auth } from "./middleware"
 import jwt_sec from "@repo/backend-common/config";
-import { client } from "@repo/db/client"
+import {client} from "@repo/db/client"
 
 const app = express();
 
@@ -13,7 +13,7 @@ app.get("/",auth,(req,res)=>{
     res.send("hello");
 })
 
-app.post("/signup",async(req: Request,res: any)=>{
+app.post("/signup",async(req,res)=>{
     if(!req.body){
         return;
     }
@@ -25,25 +25,42 @@ app.post("/signup",async(req: Request,res: any)=>{
 
     let {success , error} = userSchema.safeParse(currUser);
     if(!success){
-        return res.send(error);
+        res.send(error);
+        return;
     }
-
-    //DB logic
-    // currUser = await client.user.findFirst({
-    //     where:{
-    //         username: req.body.username
-    //     }
-    // })
-
-    // if(exist){}
+    
+    try{
+        await client.user.create({
+            data:{
+                username: req.body.username,
+                password: req.body.password
+            }
+        })
+    }catch(e){
+        res.json({message: "username already taken"});
+        return;
+    }
 
     res.json({
         message: "all good"
     })
 })
 
-app.post("/login",(req,res)=>{
-    let currUser = req.body;
+app.post("/login",async(req,res)=>{
+
+    let currUser = await client.user.findFirst({where: {
+        username: req.body.username
+    }})
+
+    if(!currUser){
+        res.json({message:"User doesnt exist, go create an acccount"});
+        return;
+    }
+    
+    if(currUser.password != req.body.password){
+        res.json({message:"incorrect password"});
+        return;
+    }
     //DB logic 
     let token = jwt.sign({
         userId: req.body.username

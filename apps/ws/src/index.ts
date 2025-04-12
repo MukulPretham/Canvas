@@ -29,14 +29,16 @@ wss.on("connection",(socket,request)=>{
         socket.close();
         return;
     }
-
-    const decoded:decodedMsg = jwt.verify(token,jwt_sec)as decodedMsg;
+    try{
+        const decoded:decodedMsg = jwt.verify(token,jwt_sec)as decodedMsg;
     
-    if(!decoded.userId){
+    }catch(e){
         socket.send(JSON.stringify({message: "not authorised"}));
-        socket.close();
-        return;
+            socket.close();
     }
+    
+    
+    
 
     socket.on("message",(data)=>{
         socket.send(data.toString());
