@@ -63,17 +63,48 @@ app.post("/login",async(req,res)=>{
     }
     //DB logic 
     let token = jwt.sign({
-        userId: req.body.username
+        userId: currUser.id
     },jwt_sec);
     res.json({
         token: token
     })
 })
 
-app.post("/create",auth,(req,res)=>{
-    res.json({
-        message: "ready to create a room",
-    })
+app.post("/create",auth,async(req:any,res)=>{
+    if(!req.body.roomName){
+        res.json({
+            error: "enter room name"
+        })
+        return;
+    }
+    let roomName:string = req.body.roomName;
+    let userId = req?.userId;
+
+    try{
+        const currUser = await client.user.findFirst({
+            where:{
+                id: userId
+            }
+        });
+        if(!currUser?.id){
+            return;
+        }
+        const createdRoom = await client.room.create({
+            data:{
+                slug: roomName,
+                adminID: currUser?.id
+            }
+        });
+
+        res.status(200).json({
+            message: `room ${createdRoom.id} created in the name of ${createdRoom.slug}`
+        })
+
+    }catch(e){
+        res.json({message: "unauthorised"});
+        return;
+    }
+
 })
 
 app.listen(8081,()=>{
