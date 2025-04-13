@@ -4,9 +4,11 @@ import { string, z } from "zod";
 import { auth } from "./middleware"
 import jwt_sec from "@repo/backend-common/config";
 import {client} from "@repo/db/client"
+import cors from "cors"
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.get("/",auth,(req,res)=>{
@@ -15,6 +17,7 @@ app.get("/",auth,(req,res)=>{
 
 app.post("/signup",async(req,res)=>{
     if(!req.body){
+        res.status(404).json({message: "Invalid format"});
         return;
     }
     let currUser = req.body;
@@ -25,7 +28,7 @@ app.post("/signup",async(req,res)=>{
 
     let {success , error} = userSchema.safeParse(currUser);
     if(!success){
-        res.send(error);
+        res.status(404).json(error);
         return;
     }
     
@@ -37,12 +40,12 @@ app.post("/signup",async(req,res)=>{
             }
         })
     }catch(e){
-        res.json({message: "username already taken"});
+        res.status(404).json({message: "username already taken"});
         return;
     }
 
     res.json({
-        message: "all good"
+        message: "Your account has been created"
     })
 })
 
@@ -53,12 +56,12 @@ app.post("/login",async(req,res)=>{
     }})
 
     if(!currUser){
-        res.json({message:"User doesnt exist, go create an acccount"});
+        res.status(404).json({message:"User doesnt exist, go create an acccount"});
         return;
     }
     
     if(currUser.password != req.body.password){
-        res.json({message:"incorrect password"});
+        res.status(404).json({message:"incorrect password"});
         return;
     }
     //DB logic 
