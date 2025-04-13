@@ -1,7 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
+import { recognise } from "@repo/utils/utils"
 
 export default function Home() {
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-black dark:bg-black dark:text-white transition-colors duration-300">
       {/* Navbar */}
