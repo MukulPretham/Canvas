@@ -1,5 +1,7 @@
+import { SideBar } from "@repo/ui/SideBar"
+
 export default function page (){
     return(
-        <div>Home</div>
+        <div><SideBar/></div>
     )
 }
