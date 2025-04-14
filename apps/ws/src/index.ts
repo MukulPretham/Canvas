@@ -95,7 +95,7 @@ wss.on("connection",async(socket,request)=>{
                     console.log(entry.roomId);
                     return;
                 }
-            })
+            });
         }
         else if(parsedData.type === "leave" && parsedData.roomId){
             Users.forEach((entry)=>{
