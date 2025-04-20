@@ -74,6 +74,7 @@ app.post("/login",async(req,res)=>{
 })
 
 app.post("/create",auth,async(req:any,res)=>{
+    console.log(req.body);
     if(!req.body.roomName){
         res.json({
             error: "enter room name"
@@ -111,7 +112,7 @@ app.post("/create",auth,async(req:any,res)=>{
 })
 
 app.get("/chats/:roomId",auth,async(req,res)=>{
-    let roomId = Number(req.params.roomId);
+    let roomId = req.params.roomId;
     let messages;
     try{
         messages = await client.chat.findMany({
@@ -125,6 +126,36 @@ app.get("/chats/:roomId",auth,async(req,res)=>{
     }
     res.json(messages);
 })
+
+app.get("/rooms",auth,async(req:any,res)=>{
+    const currUserID = req.userId;
+    try{
+        const joinedRooms = await client.joinLogs.findMany({
+            where:{
+                member: currUserID
+            }
+        })
+        console.log(joinedRooms+"  ---  >   ");
+        const rooms = await Promise.all(joinedRooms.map(async(room)=>{
+            const roomDetails = await client.room.findFirst({
+                where:{
+                    id: room.room
+                }
+            })
+            const obj = {
+                slug: roomDetails?.slug,
+                roomId : roomDetails?.id
+            }
+            return obj
+        }));
+        console.log(rooms);
+        res.json(rooms);
+    }catch(err){
+        res.status(500).json({error:"server error"})
+    }
+    
+}
+)
 
 app.listen(8081,()=>{
     console.log("http server has started");

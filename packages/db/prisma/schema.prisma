@@ -13,28 +13,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
-  id String @default(uuid()) @id
-  username String @unique
-  password String 
-  image String?
-  rooms Room[]
-  chats Chat[]
+model User {
+  id       String     @id @default(uuid())
+  username String     @unique
+  password String
+  image    String?
+  rooms    Room[]
+  chats    Chat[]
+  Joined   JoinLogs[]
 }
 
-model Room{
-  id Int @default(autoincrement()) @id
-  slug String @unique
+model Room {
+  id      String @id @default(uuid())
+  slug    String @unique
   adminID String
-  admin User @relation(fields: [adminID],references: [id])
-  chats Chat[]
+  admin   User   @relation(fields: [adminID], references: [id])
+
+  chats  Chat[]
+  Joined JoinLogs[]
 }
 
-model Chat{
-  id Int @default(autoincrement()) @id
-  roomID Int
+model JoinLogs {
+  id           Int    @id @default(autoincrement())
+  room         String
+  member       String
+  joinedMember User   @relation(fields: [member], references: [id])
+  joinedRoom   Room   @relation(fields: [room], references: [id])
+
+  @@unique([room, member])
+}
+
+model Chat {
+  id       Int    @id @default(autoincrement())
+  roomID   String
   senderID String
-  message String @default("Default message")
-  room Room @relation(fields: [roomID],references: [id])
-  sender User @relation(fields: [senderID],references: [id])
+  message  String @default("Default message")
+  room     Room   @relation(fields: [roomID], references: [id])
+  sender   User   @relation(fields: [senderID], references: [id])
 }

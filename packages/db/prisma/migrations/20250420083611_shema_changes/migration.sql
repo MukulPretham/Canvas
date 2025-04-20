@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "JoinLogs" ALTER COLUMN "room" SET DATA TYPE TEXT;
+
+-- AddForeignKey
+ALTER TABLE "JoinLogs" ADD CONSTRAINT "JoinLogs_member_fkey" FOREIGN KEY ("member") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "JoinLogs" ADD CONSTRAINT "JoinLogs_room_fkey" FOREIGN KEY ("room") REFERENCES "Room"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

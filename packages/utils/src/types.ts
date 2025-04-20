@@ -15,12 +15,12 @@ export type ChatPayload = {
 
 export type Message = {
     type: "join" | "message" | "leave"
-    roomId: Number
+    roomId: string
     messagePayload?: ChatPayload
 }
 
 export interface User {
     socket: WebSocket
     userId: string
-    roomId : Number[]
+    roomId : string[]
 }
